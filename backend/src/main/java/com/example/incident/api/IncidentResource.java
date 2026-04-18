@@ -1,0 +1,41 @@
+package com.example.incident.api;
+
+import com.example.incident.domain.IncidentReport;
+import com.example.incident.service.IncidentReportService;
+import com.example.incident.service.ReportExportService;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
+
+@Path("/api/incidents")
+public class IncidentResource {
+
+    @Inject
+    IncidentReportService reportService;
+
+    @Inject
+    ReportExportService exportService;
+
+    @GET
+    @Path("/{incidentId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public IncidentReport getReport(@PathParam("incidentId") String incidentId) {
+        IncidentReport report = reportService.buildReport(incidentId);
+        if (report == null) {
+            throw new NotFoundException("Incident not found: " + incidentId);
+        }
+        return report;
+    }
+
+    @GET
+    @Path("/{incidentId}/report.md")
+    @Produces("text/markdown")
+    public String exportMarkdown(@PathParam("incidentId") String incidentId) {
+        IncidentReport report = getReport(incidentId);
+        return exportService.toMarkdown(report);
+    }
+}
