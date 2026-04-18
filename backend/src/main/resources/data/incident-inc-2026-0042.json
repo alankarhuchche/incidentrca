@@ -1,0 +1,77 @@
+{
+  "incidentId": "inc-2026-0042",
+  "title": "Synthetic payment authorization degradation in us-central1",
+  "status": "Mitigated",
+  "events": [
+    {
+      "id": "evt-001",
+      "timestamp": "2026-04-17T09:00:12Z",
+      "source": "synthetic-apm",
+      "type": "application_log",
+      "service": "checkout-service",
+      "region": "us-central1",
+      "severity": "WARN",
+      "message": "p95 authorization latency exceeded 2.8s threshold",
+      "attributes": {
+        "traceId": "syn-trace-1001",
+        "tenant": "synthetic-merchant-a"
+      }
+    },
+    {
+      "id": "evt-002",
+      "timestamp": "2026-04-17T09:01:05Z",
+      "source": "synthetic-db-monitor",
+      "type": "db_error",
+      "service": "payments-db",
+      "region": "us-central1",
+      "severity": "ERROR",
+      "message": "lock wait timeout on partition payments_2026_04",
+      "attributes": {
+        "lockWaitMs": "4120",
+        "host": "synthetic-db-01"
+      }
+    },
+    {
+      "id": "evt-003",
+      "timestamp": "2026-04-17T09:01:43Z",
+      "source": "synthetic-gateway-metrics",
+      "type": "payment_gateway",
+      "service": "gateway-adapter",
+      "region": "us-central1",
+      "severity": "WARN",
+      "message": "gateway timeout rate rose to 7.2%",
+      "attributes": {
+        "provider": "synthetic-gateway-x",
+        "timeoutRate": "0.072"
+      }
+    },
+    {
+      "id": "evt-004",
+      "timestamp": "2026-04-17T09:02:24Z",
+      "source": "synthetic-queue-metrics",
+      "type": "application_log",
+      "service": "checkout-service",
+      "region": "us-central1",
+      "severity": "ERROR",
+      "message": "retry queue depth reached 1300 messages",
+      "attributes": {
+        "queue": "auth-retry-queue",
+        "depth": "1300"
+      }
+    },
+    {
+      "id": "evt-005",
+      "timestamp": "2026-04-17T09:04:30Z",
+      "source": "synthetic-apm",
+      "type": "application_log",
+      "service": "checkout-service",
+      "region": "us-central1",
+      "severity": "INFO",
+      "message": "latency recovered after retry concurrency reduction",
+      "attributes": {
+        "action": "reduce-retry-concurrency",
+        "operator": "synthetic-oncall"
+      }
+    }
+  ]
+}
