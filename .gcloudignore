@@ -1,0 +1,18 @@
+# If you would like to upload your .git directory, .gitignore file or files
+# from your .gitignore file, remove the corresponding line below:
+.gcloudignore
+.git
+.gitignore
+
+# Avoid shipping local build/dependency artifacts to Cloud Build source upload
+**/node_modules
+frontend/dist
+frontend/.vite
+backend/target
+
+# Local/editor files
+.DS_Store
+*.log
+*.tmp
+.idea
+.vscode
