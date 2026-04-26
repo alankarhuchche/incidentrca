@@ -20,3 +20,17 @@ add Cloud SQL PostgreSQL
 add Artifact Registry CI/CD and GitHub-triggered deploys
 add authentication
 add observability and structured audit persistence
+
+Cloud Run publish baseline parameters (recommended for public demo):
+- --allow-unauthenticated (public URL)
+- --port 8080
+- --min-instances 1 (keeps demo warm)
+- --max-instances 3
+- --memory 512Mi
+- --cpu 1
+- --concurrency 80
+- --timeout 300
+
+Build reliability notes:
+- Keep `.gcloudignore` and `.dockerignore` in sync to avoid uploading local artifacts.
+- Exclude `node_modules`, frontend build outputs, and backend targets from source upload.
