@@ -12,11 +12,11 @@ COPY backend/pom.xml ./
 COPY backend/src ./src
 COPY --from=frontend-build /app/frontend/dist ./src/main/resources/META-INF/resources
 RUN mvn -DskipTests -Dquarkus.package.jar.type=fast-jar package && \
-    test -d target
+    test -f target/quarkus-app/quarkus-run.jar
 
 FROM eclipse-temurin:21-jre
 WORKDIR /app
 COPY --from=backend-build /app/backend/target ./target
 ENV PORT=8080
 EXPOSE 8080
-CMD ["sh", "-c", "if [ -f /app/target/quarkus-app/quarkus-run.jar ]; then exec java -Dquarkus.http.host=0.0.0.0 -jar /app/target/quarkus-app/quarkus-run.jar; fi; RUNNER=$(find /app/target -maxdepth 1 -name '*-runner.jar' | head -n 1); if [ -n \"$RUNNER\" ]; then exec java -Dquarkus.http.host=0.0.0.0 -jar \"$RUNNER\"; fi; APP_JAR=$(find /app/target -maxdepth 1 -name '*.jar' ! -name 'original-*.jar' | head -n 1); if [ -n \"$APP_JAR\" ]; then exec java -Dquarkus.http.host=0.0.0.0 -jar \"$APP_JAR\"; fi; echo 'No runnable JAR found under /app/target'; find /app/target -maxdepth 3 -type f; exit 1"]
+CMD ["sh", "-c", "exec java -Dquarkus.http.host=0.0.0.0 -Dquarkus.http.port=${PORT:-8080} -jar /app/target/quarkus-app/quarkus-run.jar"]
