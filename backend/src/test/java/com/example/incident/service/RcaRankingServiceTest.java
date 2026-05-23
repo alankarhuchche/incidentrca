@@ -14,6 +14,12 @@ class RcaRankingServiceTest {
     private final RcaRankingService service = new RcaRankingService();
 
     @Test
+    void returnsNoFindingsWhenAllEvidenceIsAbsent() {
+        var findings = service.rankTopFindings(List.of());
+        assertTrue(findings.isEmpty());
+    }
+
+    @Test
     void ranksTopThreeByConfidenceAndPreservesEvidenceTraceability() {
         List<Evidence> evidence = List.of(
             new Evidence("E-db-1", "db_error", "db", "evt1", Instant.parse("2026-04-17T09:01:00Z"), "d"),

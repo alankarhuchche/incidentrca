@@ -24,6 +24,7 @@ public class RcaRankingService {
         findings.add(buildRetryHypothesis(byCategory.getOrDefault("application_log", List.of())));
 
         return findings.stream()
+            .filter(f -> !f.supportingEvidenceIds().isEmpty())
             .sorted(Comparator.comparing(RcaFinding::confidence).reversed())
             .limit(3)
             .toList();

@@ -22,7 +22,7 @@ export function EvidencePanel({ evidence }: EvidencePanelProps) {
           {evidence.map((item) => (
             <tr key={item.id}>
               <td>{item.id}</td>
-              <td>{new Date(item.timestamp).toLocaleString()}</td>
+              <td>{new Date(item.timestamp).toISOString().replace('T', ' ').slice(0, 19)} UTC</td>
               <td>{item.category}</td>
               <td>{item.summary}</td>
               <td>{item.detail}</td>

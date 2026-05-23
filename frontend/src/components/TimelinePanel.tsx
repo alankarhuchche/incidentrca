@@ -11,7 +11,7 @@ export function TimelinePanel({ timeline }: TimelinePanelProps) {
       <ol>
         {timeline.map((entry) => (
           <li key={`${entry.timestamp}-${entry.title}`}>
-            <strong>{new Date(entry.timestamp).toLocaleString()}</strong>
+            <strong>{new Date(entry.timestamp).toISOString().replace('T', ' ').slice(0, 19)} UTC</strong>
             <div>{entry.title}</div>
             <small>{entry.description}</small>
             <div>Evidence: {entry.evidenceIds.join(', ')}</div>
