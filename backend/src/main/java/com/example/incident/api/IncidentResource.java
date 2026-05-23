@@ -1,7 +1,9 @@
 package com.example.incident.api;
 
+import com.example.incident.domain.AiExplanation;
 import com.example.incident.domain.IncidentReport;
 import com.example.incident.domain.IncidentSummary;
+import com.example.incident.service.AiExplainerService;
 import com.example.incident.service.IncidentReportService;
 import com.example.incident.service.ReportExportService;
 import jakarta.inject.Inject;
@@ -22,6 +24,9 @@ public class IncidentResource {
 
     @Inject
     ReportExportService exportService;
+
+    @Inject
+    AiExplainerService aiExplainerService;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -46,5 +51,16 @@ public class IncidentResource {
     public String exportMarkdown(@PathParam("incidentId") String incidentId) {
         IncidentReport report = getReport(incidentId);
         return exportService.toMarkdown(report);
+    }
+
+    @GET
+    @Path("/{incidentId}/explain")
+    @Produces(MediaType.APPLICATION_JSON)
+    public AiExplanation explainIncident(@PathParam("incidentId") String incidentId) {
+        IncidentReport report = reportService.buildReport(incidentId);
+        if (report == null) {
+            throw new NotFoundException("Incident not found: " + incidentId);
+        }
+        return aiExplainerService.explain(report);
     }
 }
