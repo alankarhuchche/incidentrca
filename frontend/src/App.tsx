@@ -2,28 +2,57 @@ import { useEffect, useState } from 'react';
 import { EvidencePanel } from './components/EvidencePanel';
 import { RcaFindingsPanel } from './components/RcaFindingsPanel';
 import { TimelinePanel } from './components/TimelinePanel';
-import { getIncidentReport } from './services/api';
-import type { IncidentReport } from './types';
+import { listIncidents, getIncidentReport } from './services/api';
+import type { IncidentReport, IncidentSummary } from './types';
 import './app.css';
 
-const SAMPLE_INCIDENT_ID = 'inc-2026-0042';
-
 function App() {
+  const [incidents, setIncidents] = useState<IncidentSummary[]>([]);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [report, setReport] = useState<IncidentReport | null>(null);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    getIncidentReport(SAMPLE_INCIDENT_ID)
-      .then(setReport)
-      .catch((loadError) => setError(loadError instanceof Error ? loadError.message : 'Unknown error'));
+    listIncidents()
+      .then((list) => {
+        setIncidents(list);
+        if (list.length > 0) setSelectedId(list[0].id);
+      })
+      .catch((e) => setError(e instanceof Error ? e.message : 'Failed to load incidents'));
   }, []);
+
+  useEffect(() => {
+    if (!selectedId) return;
+    setLoading(true);
+    setReport(null);
+    getIncidentReport(selectedId)
+      .then((r) => { setReport(r); setLoading(false); })
+      .catch((e) => { setError(e instanceof Error ? e.message : 'Unknown error'); setLoading(false); });
+  }, [selectedId]);
 
   return (
     <main>
       <h1>Payments Incident RCA Copilot</h1>
       <p>Using synthetic incident data only. Human review required before final report publication.</p>
+      {incidents.length > 0 && (
+        <section>
+          <label htmlFor="incident-select">Incident: </label>
+          <select
+            id="incident-select"
+            value={selectedId ?? ''}
+            onChange={(e) => { setError(null); setSelectedId(e.target.value); }}
+          >
+            {incidents.map((inc) => (
+              <option key={inc.id} value={inc.id}>
+                {inc.id} — {inc.title}
+              </option>
+            ))}
+          </select>
+        </section>
+      )}
       {error && <p role="alert">{error}</p>}
-      {!report && !error && <p>Loading sample incident...</p>}
+      {loading && <p>Loading incident...</p>}
       {report && (
         <>
           <section>

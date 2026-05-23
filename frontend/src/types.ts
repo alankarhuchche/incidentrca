@@ -1,3 +1,9 @@
+export type IncidentSummary = {
+  id: string;
+  title: string;
+  status: string;
+};
+
 export type TimelineEntry = {
   timestamp: string;
   title: string;
