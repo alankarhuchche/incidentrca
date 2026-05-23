@@ -13,6 +13,19 @@ class TimelineReconstructionServiceTest {
     private final TimelineReconstructionService service = new TimelineReconstructionService();
 
     @Test
+    void reconstructWithSingleEventProducesSingleEntry() {
+        List<Evidence> evidence = List.of(
+            new Evidence("E-1", "db_error", "db issue", "evt1", Instant.parse("2026-04-17T09:01:00Z"), "d")
+        );
+
+        var timeline = service.reconstruct(evidence);
+
+        assertEquals(1, timeline.size());
+        assertEquals("db_error observed", timeline.get(0).title());
+        assertEquals(List.of("E-1"), timeline.get(0).evidenceIds());
+    }
+
+    @Test
     void reconstructBuildsChronologicalEntriesPerCategory() {
         List<Evidence> evidence = List.of(
             new Evidence("E-2", "db_error", "db issue", "evt2", Instant.parse("2026-04-17T09:01:00Z"), "d"),
