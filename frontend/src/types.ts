@@ -4,6 +4,15 @@ export type IncidentSummary = {
   status: string;
 };
 
+export type AiExplanation = {
+  incidentId: string;
+  summary: string;
+  rootCauseSummary: string;
+  recommendedAction: string;
+  provider: string;
+  aiGenerated: boolean;
+};
+
 export type TimelineEntry = {
   timestamp: string;
   title: string;

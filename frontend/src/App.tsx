@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
+import { AiExplanationPanel } from './components/AiExplanationPanel';
 import { EvidencePanel } from './components/EvidencePanel';
 import { RcaFindingsPanel } from './components/RcaFindingsPanel';
 import { TimelinePanel } from './components/TimelinePanel';
-import { listIncidents, getIncidentReport } from './services/api';
-import type { IncidentReport, IncidentSummary } from './types';
+import { getExplanation, listIncidents, getIncidentReport } from './services/api';
+import type { AiExplanation, IncidentReport, IncidentSummary } from './types';
 import './app.css';
 
 function App() {
@@ -12,6 +13,9 @@ function App() {
   const [report, setReport] = useState<IncidentReport | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [explanation, setExplanation] = useState<AiExplanation | null>(null);
+  const [explanationLoading, setExplanationLoading] = useState(false);
+  const [explanationError, setExplanationError] = useState<string | null>(null);
 
   useEffect(() => {
     listIncidents()
@@ -26,9 +30,17 @@ function App() {
     if (!selectedId) return;
     setLoading(true);
     setReport(null);
+    setExplanation(null);
+    setExplanationLoading(true);
+    setExplanationError(null);
+
     getIncidentReport(selectedId)
       .then((r) => { setReport(r); setLoading(false); })
       .catch((e) => { setError(e instanceof Error ? e.message : 'Unknown error'); setLoading(false); });
+
+    getExplanation(selectedId)
+      .then((e) => { setExplanation(e); setExplanationLoading(false); })
+      .catch((e) => { setExplanationError(e instanceof Error ? e.message : 'Explanation unavailable'); setExplanationLoading(false); });
   }, [selectedId]);
 
   return (
@@ -64,6 +76,11 @@ function App() {
               Export Markdown Report
             </a>
           </section>
+          <AiExplanationPanel
+            explanation={explanation}
+            loading={explanationLoading}
+            error={explanationError}
+          />
           <TimelinePanel timeline={report.timeline} />
           <EvidencePanel evidence={report.evidence} />
           <RcaFindingsPanel findings={report.topFindings} />

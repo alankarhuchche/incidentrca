@@ -49,3 +49,15 @@ select {
   padding: 0.25rem 0.5rem;
   font-size: 1rem;
 }
+
+small {
+  font-size: 0.75em;
+  font-weight: normal;
+}
+
+.analysis-note {
+  background: #fffbeb;
+  border-left: 3px solid #d97706;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.9rem;
+}
