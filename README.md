@@ -4,20 +4,22 @@ Public-safe, synthetic-data-only incident triage MVP for payment systems.
 
 ## What this first working version includes
 
-- One end-to-end synthetic sample incident (`inc-2026-0042`)
+- Two synthetic incidents (`inc-2026-0042`, `inc-2026-0099`) selectable via UI dropdown
 - Timeline reconstruction from extracted evidence
 - Evidence panel in UI
-- Top 3 RCA findings with confidence + supporting evidence IDs
+- Top RCA findings with confidence scores and supporting evidence IDs
+- Evidence guard: findings without supporting evidence are suppressed
 - Markdown report export endpoint
+- AI explanation panel showing provider, mode badge, and amber safety warnings
+- Optional Gemini AI integration (disabled by default); app safely falls back to deterministic explanation when the API key is absent
 - Single Dockerfile for one Cloud Run deployment
-- No external integrations
 - No authentication (intentionally omitted for MVP)
 
 ## Monorepo layout
 
 - `frontend/` React + TypeScript + Vite UI
 - `backend/` Java 21 + Quarkus API and deterministic engines
-- `backend/src/main/resources/data/` synthetic incident dataset
+- `backend/src/main/resources/data/` synthetic incident datasets
 - `docs/architecture.md` architecture overview
 
 ## Local development
@@ -61,8 +63,27 @@ cd ../backend && mvn package
 
 ## API
 
-- JSON report: `GET /api/incidents/inc-2026-0042`
-- Markdown report: `GET /api/incidents/inc-2026-0042/report.md`
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/api/incidents` | List all incidents (id, title, status) |
+| `GET` | `/api/incidents/{id}` | Full JSON incident report |
+| `GET` | `/api/incidents/{id}/report.md` | Markdown export |
+| `GET` | `/api/incidents/{id}/explain` | AI or deterministic explanation |
+| `GET` | `/q/health/ready` | Readiness probe |
+| `GET` | `/q/health/live` | Liveness probe |
+
+## AI explanations (optional)
+
+Gemini AI is **disabled by default**. The app always produces a deterministic explanation first; AI is an optional layer on top.
+
+To enable locally:
+
+```bash
+cd backend
+INCIDENT_GEMINI_API_KEY=your-key INCIDENT_AI_ENABLED=true mvn quarkus:dev
+```
+
+If `INCIDENT_AI_ENABLED=true` but the API key is missing or blank, the `/explain` endpoint returns a safe deterministic explanation — it never throws a 500.
 
 ## Single-service Docker build
 
@@ -88,11 +109,17 @@ This repo is ready for a **single Cloud Run service** deployment where Quarkus s
 PROJECT_ID="your-gcp-project"
 REGION="us-central1"
 SERVICE="incident-rca-copilot"
-IMAGE="gcr.io/${PROJECT_ID}/${SERVICE}:v1"
+REPO="incident-rca"
+IMAGE="${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPO}/${SERVICE}:v1"
 
 gcloud auth login
 gcloud config set project "${PROJECT_ID}"
-gcloud services enable run.googleapis.com cloudbuild.googleapis.com artifactregistry.googleapis.com
+gcloud services enable run.googleapis.com cloudbuild.googleapis.com artifactregistry.googleapis.com secretmanager.googleapis.com
+
+# Create Artifact Registry repository (one-time)
+gcloud artifacts repositories create "${REPO}" \
+  --repository-format=docker \
+  --location="${REGION}"
 ```
 
 ### 2) Build and push container image using Cloud Build
@@ -101,7 +128,7 @@ gcloud services enable run.googleapis.com cloudbuild.googleapis.com artifactregi
 gcloud builds submit --tag "${IMAGE}"
 ```
 
-### 3) Deploy to Cloud Run with internet access
+### 3) Deploy to Cloud Run
 
 ```bash
 gcloud run deploy "${SERVICE}" \
@@ -118,15 +145,44 @@ gcloud run deploy "${SERVICE}" \
   --timeout 300
 ```
 
+**Health check path:** Quarkus exposes `/q/health/ready` as the readiness probe. Configure this in the Cloud Run console under **Edit & Deploy → Health checks → Startup/Readiness probe path**. Some `gcloud` versions support `--health-check-path`; if yours does, add `--health-check-path=/q/health/ready` to the deploy command above.
+
 ### 4) Get and test the service URL
 
 ```bash
 SERVICE_URL="$(gcloud run services describe "${SERVICE}" --region "${REGION}" --format='value(status.url)')"
 echo "${SERVICE_URL}"
-curl "${SERVICE_URL}/api/incidents/inc-2026-0042"
+curl "${SERVICE_URL}/api/incidents"
+curl "${SERVICE_URL}/q/health/ready"
 ```
 
-### 5) Optional cost-saving mode (allow scale-to-zero)
+### 5) Gemini AI on Cloud Run (optional)
+
+Store the API key in Secret Manager so it never appears in environment variable history:
+
+```bash
+echo -n "your-gemini-api-key" | \
+  gcloud secrets create gemini-api-key --data-file=-
+
+# Grant the Cloud Run service account access
+gcloud secrets add-iam-policy-binding gemini-api-key \
+  --member="serviceAccount:YOUR_SERVICE_ACCOUNT@${PROJECT_ID}.iam.gserviceaccount.com" \
+  --role="roles/secretmanager.secretAccessor"
+```
+
+Then redeploy with the secret mounted as an environment variable:
+
+```bash
+gcloud run deploy "${SERVICE}" \
+  --image "${IMAGE}" \
+  --region "${REGION}" \
+  --update-secrets="INCIDENT_GEMINI_API_KEY=gemini-api-key:latest" \
+  --update-env-vars="INCIDENT_AI_ENABLED=true"
+```
+
+If the secret is unavailable or the key is blank, the app falls back to deterministic explanations automatically — no 500 errors.
+
+### 6) Optional cost-saving mode (allow scale-to-zero)
 
 Use this if you do not need the app always warm:
 
