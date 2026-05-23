@@ -2,6 +2,14 @@
 
 Public-safe, synthetic-data-only incident triage MVP for payment systems.
 
+## Live Demo
+
+| | |
+|---|---|
+| **App** | https://incidentrca-638324583785.europe-west1.run.app/ |
+| **Incident list API** | https://incidentrca-638324583785.europe-west1.run.app/api/incidents |
+| **Health check** | https://incidentrca-638324583785.europe-west1.run.app/q/health/ready |
+
 ## What this first working version includes
 
 - Two synthetic incidents (`inc-2026-0042`, `inc-2026-0099`) selectable via UI dropdown
@@ -107,7 +115,7 @@ This repo is ready for a **single Cloud Run service** deployment where Quarkus s
 
 ```bash
 PROJECT_ID="your-gcp-project"
-REGION="europe-west2"
+REGION="europe-west1"
 SERVICE="incident-rca-copilot"
 REPO="incident-rca"
 IMAGE="${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPO}/${SERVICE}:v1"
