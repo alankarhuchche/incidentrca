@@ -15,9 +15,11 @@ public class AiExplainerService {
     @Inject
     NoopAiProvider noopProvider;
 
+    @Inject
+    GeminiAiProvider geminiProvider;
+
     public AiExplanation explain(IncidentReport report) {
-        // aiEnabled is the branch point for Gemini in Tier 5.
-        // Tier 5 adds: if (aiEnabled) return geminiProvider.explain(report);
+        if (aiEnabled) return geminiProvider.explain(report);
         return noopProvider.explain(report);
     }
 }
