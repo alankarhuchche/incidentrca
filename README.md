@@ -107,7 +107,7 @@ This repo is ready for a **single Cloud Run service** deployment where Quarkus s
 
 ```bash
 PROJECT_ID="your-gcp-project"
-REGION="us-central1"
+REGION="europe-west2"
 SERVICE="incident-rca-copilot"
 REPO="incident-rca"
 IMAGE="${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPO}/${SERVICE}:v1"
