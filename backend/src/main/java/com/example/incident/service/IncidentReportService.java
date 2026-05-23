@@ -2,8 +2,11 @@ package com.example.incident.service;
 
 import com.example.incident.domain.IncidentDataset;
 import com.example.incident.domain.IncidentReport;
+import com.example.incident.domain.IncidentSummary;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+
+import java.util.List;
 
 @ApplicationScoped
 public class IncidentReportService {
@@ -19,6 +22,10 @@ public class IncidentReportService {
 
     @Inject
     RcaRankingService rankingService;
+
+    public List<IncidentSummary> listIncidents() {
+        return repository.listSummaries();
+    }
 
     public IncidentReport buildReport(String incidentId) {
         IncidentDataset incident = repository.load(incidentId);

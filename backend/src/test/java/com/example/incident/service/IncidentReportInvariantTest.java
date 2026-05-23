@@ -20,10 +20,12 @@ class IncidentReportInvariantTest {
     IncidentReportService reportService;
 
     private IncidentReport report;
+    private IncidentReport report2;
 
     @BeforeEach
-    void buildReport() {
+    void buildReports() {
         report = reportService.buildReport("inc-2026-0042");
+        report2 = reportService.buildReport("inc-2026-0099");
     }
 
     @Test
@@ -65,5 +67,33 @@ class IncidentReportInvariantTest {
             assertFalse(finding.supportingEvidenceIds().isEmpty(),
                 "Finding " + finding.id() + " has empty supportingEvidenceIds");
         }
+    }
+
+    @Test
+    void secondIncidentAllFindingEvidenceIdsExistInEvidence() {
+        Set<String> evidenceIds = report2.evidence().stream()
+            .map(Evidence::id)
+            .collect(Collectors.toSet());
+
+        for (var finding : report2.topFindings()) {
+            for (var evidenceId : finding.supportingEvidenceIds()) {
+                assertTrue(evidenceIds.contains(evidenceId),
+                    "Finding " + finding.id() + " references evidence ID " + evidenceId
+                        + " which is not present in the evidence list");
+            }
+        }
+    }
+
+    @Test
+    void secondIncidentReviewRequirementIsNonNullAndNonEmpty() {
+        assertNotNull(report2.reviewRequirement());
+        assertFalse(report2.reviewRequirement().isBlank());
+    }
+
+    @Test
+    void secondIncidentReturnsFewerThanThreeFindings() {
+        assertTrue(report2.topFindings().size() < 3,
+            "Expected fewer than 3 findings for inc-2026-0099 (no db_error events, RCA-1 should be filtered), "
+                + "but got " + report2.topFindings().size());
     }
 }

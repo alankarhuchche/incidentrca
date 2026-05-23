@@ -62,4 +62,33 @@ class IncidentResourceTest {
             .body(containsString("## Timeline"))
             .body(containsString("## Top RCA Findings"));
     }
+
+    @Test
+    void getIncidentsListingReturns200WithTwoItems() {
+        given()
+            .when().get("/api/incidents")
+            .then()
+            .statusCode(200)
+            .contentType(ContentType.JSON)
+            .body("size()", equalTo(2));
+    }
+
+    @Test
+    void getReportReturns200ForSecondIncident() {
+        given()
+            .when().get("/api/incidents/inc-2026-0099")
+            .then()
+            .statusCode(200)
+            .contentType(ContentType.JSON)
+            .body("incidentId", equalTo("inc-2026-0099"));
+    }
+
+    @Test
+    void getMarkdownReturns200ForSecondIncident() {
+        given()
+            .when().get("/api/incidents/inc-2026-0099/report.md")
+            .then()
+            .statusCode(200)
+            .contentType("text/markdown");
+    }
 }

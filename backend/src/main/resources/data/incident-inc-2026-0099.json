@@ -1,0 +1,77 @@
+{
+  "incidentId": "inc-2026-0099",
+  "title": "Synthetic FX rate feed outage causing GBP/EUR payment rejections",
+  "status": "Resolved",
+  "events": [
+    {
+      "id": "evt-101",
+      "timestamp": "2026-05-08T14:15:03Z",
+      "source": "synthetic-apm",
+      "type": "application_log",
+      "service": "fx-rate-service",
+      "region": "eu-west-2",
+      "severity": "ERROR",
+      "message": "FX rate feed connection refused after 3 retries",
+      "attributes": {
+        "feed": "synthetic-fx-provider-b",
+        "currency_pair": "GBP/EUR"
+      }
+    },
+    {
+      "id": "evt-102",
+      "timestamp": "2026-05-08T14:16:11Z",
+      "source": "synthetic-gateway-metrics",
+      "type": "payment_gateway",
+      "service": "payment-processor",
+      "region": "eu-west-2",
+      "severity": "ERROR",
+      "message": "payment rejection rate for GBP/EUR crossed 12% threshold",
+      "attributes": {
+        "currency_pair": "GBP/EUR",
+        "rejectionRate": "0.124"
+      }
+    },
+    {
+      "id": "evt-103",
+      "timestamp": "2026-05-08T14:17:45Z",
+      "source": "synthetic-apm",
+      "type": "application_log",
+      "service": "fx-rate-service",
+      "region": "eu-west-2",
+      "severity": "WARN",
+      "message": "stale FX rate cache serving values older than 5 minutes",
+      "attributes": {
+        "cacheAgeSeconds": "312",
+        "currency_pair": "GBP/EUR"
+      }
+    },
+    {
+      "id": "evt-104",
+      "timestamp": "2026-05-08T14:19:30Z",
+      "source": "synthetic-gateway-metrics",
+      "type": "payment_gateway",
+      "service": "payment-processor",
+      "region": "eu-west-2",
+      "severity": "WARN",
+      "message": "fallback FX rate applied; merchant dispute risk elevated",
+      "attributes": {
+        "fallbackSource": "synthetic-rate-snapshot-2026-05-08",
+        "affectedMerchants": "synthetic-merchant-eu-1"
+      }
+    },
+    {
+      "id": "evt-105",
+      "timestamp": "2026-05-08T14:24:08Z",
+      "source": "synthetic-apm",
+      "type": "application_log",
+      "service": "fx-rate-service",
+      "region": "eu-west-2",
+      "severity": "INFO",
+      "message": "FX rate feed reconnected; live rates resumed",
+      "attributes": {
+        "feed": "synthetic-fx-provider-b",
+        "action": "feed-reconnected"
+      }
+    }
+  ]
+}

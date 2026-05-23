@@ -1,6 +1,7 @@
 package com.example.incident.api;
 
 import com.example.incident.domain.IncidentReport;
+import com.example.incident.domain.IncidentSummary;
 import com.example.incident.service.IncidentReportService;
 import com.example.incident.service.ReportExportService;
 import jakarta.inject.Inject;
@@ -11,6 +12,8 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 
+import java.util.List;
+
 @Path("/api/incidents")
 public class IncidentResource {
 
@@ -19,6 +22,12 @@ public class IncidentResource {
 
     @Inject
     ReportExportService exportService;
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<IncidentSummary> listIncidents() {
+        return reportService.listIncidents();
+    }
 
     @GET
     @Path("/{incidentId}")

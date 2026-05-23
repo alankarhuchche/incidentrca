@@ -4,6 +4,8 @@ import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.Test;
 
+import java.util.stream.Collectors;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
@@ -37,5 +39,27 @@ class SyntheticIncidentRepositoryTest {
             assertNotNull(event.type(), "event.type must not be null");
             assertNotNull(event.message(), "event.message must not be null");
         }
+    }
+
+    @Test
+    void loadReturnsSecondIncidentDataset() {
+        var dataset = repository.load("inc-2026-0099");
+        assertNotNull(dataset);
+        assertEquals("inc-2026-0099", dataset.incidentId());
+    }
+
+    @Test
+    void listSummariesReturnsBothIncidents() {
+        var summaries = repository.listSummaries();
+        assertEquals(2, summaries.size());
+    }
+
+    @Test
+    void listSummariesContainsBothIncidentIds() {
+        var ids = repository.listSummaries().stream()
+            .map(s -> s.id())
+            .collect(Collectors.toSet());
+        assertTrue(ids.contains("inc-2026-0042"));
+        assertTrue(ids.contains("inc-2026-0099"));
     }
 }
