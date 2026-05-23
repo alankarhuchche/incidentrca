@@ -26,8 +26,8 @@ export function AiExplanationPanel({ explanation, loading, error }: Props) {
           : '⚠ Generated deterministically from RCA findings. The evidence and findings below are the source of truth.'}
       </p>
 
-      <h3>Summary</h3>
-      <p>{explanation.summary}</p>
+      <h3>AI Incident Review</h3>
+      <p style={{ whiteSpace: 'pre-wrap' }}>{explanation.summary}</p>
 
       <h3>Root Cause</h3>
       <p>{explanation.rootCauseSummary}</p>
